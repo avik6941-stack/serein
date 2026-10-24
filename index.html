@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Book a restorative massage at Serein. Choose your treatment, find a time, and make space to feel your best."
+    />
+    <title>Serein — A little more room to breathe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="Serein home">
+        <span class="brand-mark" aria-hidden="true">s</span>
+        <span>serein</span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#treatments">Treatments</a>
+        <a href="#our-approach">Our approach</a>
+        <a href="#visit">Find us</a>
+      </nav>
+      <a class="button button-small" href="#booking">Book a session <span aria-hidden="true">↗</span></a>
+      <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
+        <span></span><span></span>
+      </button>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-line"></span> YOUR TIME, WELL SPENT</p>
+          <h1>A little more<br />room to <em>breathe.</em></h1>
+          <p class="hero-description">
+            Thoughtful massage, tailored to you. Step away from the noise and leave feeling a little more like yourself.
+          </p>
+          <div class="hero-actions">
+            <a class="button" href="#booking">Find your moment <span aria-hidden="true">↗</span></a>
+            <a class="text-link" href="#treatments">Explore treatments <span aria-hidden="true">↓</span></a>
+          </div>
+          <div class="hero-note">
+            <div class="avatar-stack" aria-hidden="true"><span>J</span><span>M</span><span>A</span></div>
+            <p><strong>A softer kind of self-care.</strong><br />Loved by our little community</p>
+          </div>
+        </div>
+        <div class="hero-art" role="img" aria-label="A calm, sunlit massage room with natural textures">
+          <div class="art-label"><span class="label-dot"></span> A PLACE TO COME BACK TO YOU</div>
+          <div class="art-caption">
+            <span>01 / 03</span>
+            <span class="caption-rule"></span>
+            <span>Slow down. Feel more.</span>
+          </div>
+          <span class="art-sun" aria-hidden="true"></span>
+          <span class="art-leaf art-leaf-one" aria-hidden="true"></span>
+          <span class="art-leaf art-leaf-two" aria-hidden="true"></span>
+        </div>
+        <div class="hero-index" aria-hidden="true">01 — 03</div>
+      </section>
+
+      <section class="trust-row" aria-label="Studio details">
+        <div><span class="trust-icon">✳</span><span>Practitioners who listen</span></div>
+        <div><span class="trust-icon">✳</span><span>Care made for your body</span></div>
+        <div><span class="trust-icon">✳</span><span>A quiet corner of the city</span></div>
+      </section>
+
+      <section class="treatments section-wrap" id="treatments">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-line"></span> FIND WHAT FEELS RIGHT</p>
+            <h2>Care that meets<br />you <em>where you are.</em></h2>
+          </div>
+          <p class="section-intro">No two bodies are the same. Choose a place to start, and we’ll make the session your own.</p>
+        </div>
+        <div class="treatment-grid">
+          <article class="treatment-card">
+            <div class="treatment-number">01</div>
+            <div class="treatment-symbol symbol-sun" aria-hidden="true">✳</div>
+            <h3>Unwind</h3>
+            <p>Gentle, flowing massage to quiet a busy mind and soften everyday tension.</p>
+            <div class="treatment-meta"><span>60 min</span><span>₹1,000</span></div>
+            <button class="card-link select-treatment" type="button" data-service="Unwind" data-duration="60" data-price="1000">
+              Choose this treatment <span aria-hidden="true">↗</span>
+            </button>
+          </article>
+          <article class="treatment-card treatment-card-featured">
+            <div class="treatment-number">02</div>
+            <div class="treatment-symbol symbol-wave" aria-hidden="true">〰</div>
+            <h3>Restore</h3>
+            <p>Focused, restorative pressure to help release stubborn knots and built-up stress.</p>
+            <div class="treatment-meta"><span>75 min</span><span>₹1,250</span></div>
+            <button class="card-link select-treatment" type="button" data-service="Restore" data-duration="75" data-price="1250">
+              Choose this treatment <span aria-hidden="true">↗</span>
+            </button>
+          </article>
+          <article class="treatment-card">
+            <div class="treatment-number">03</div>
+            <div class="treatment-symbol symbol-flower" aria-hidden="true">✿</div>
+            <h3>Reconnect</h3>
+            <p>A full-body experience that gives you time to settle in, let go, and reset.</p>
+            <div class="treatment-meta"><span>90 min</span><span>₹1,500</span></div>
+            <button class="card-link select-treatment" type="button" data-service="Reconnect" data-duration="90" data-price="1500">
+              Choose this treatment <span aria-hidden="true">↗</span>
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <section class="approach" id="our-approach">
+        <div class="approach-image" role="img" aria-label="A peaceful massage studio with warm afternoon light">
+          <span class="image-note">A slower pace<br />starts here.</span>
+        </div>
+        <div class="approach-copy">
+          <p class="eyebrow"><span class="eyebrow-line"></span> A DIFFERENT KIND OF APPOINTMENT</p>
+          <h2>Come as you are.<br /><em>Leave a little lighter.</em></h2>
+          <p>We make room for the whole person, not just the sore shoulder. Your practitioner will check in, listen closely, and shape every session around what you need that day.</p>
+          <a class="text-link" href="#booking">Get to know us <span aria-hidden="true">↗</span></a>
+          <div class="approach-stat"><strong>4.9<span>/5</span></strong><span>from 300+ lovely reviews</span></div>
+        </div>
+      </section>
+
+      <section class="booking-section section-wrap" id="booking">
+        <div class="booking-intro">
+          <p class="eyebrow"><span class="eyebrow-line"></span> YOUR NEXT EXHALE</p>
+          <h2>Make a little<br />space for <em>you.</em></h2>
+          <p>Choose your treatment, your preferred location, and a time that works.</p>
+          <div class="booking-hours">
+            <span class="hours-mark">✳</span>
+            <div><strong>Here when you need us</strong><span>Mon–Sat, 11:00am – 1:00am</span></div>
+          </div>
+        </div>
+        <form class="booking-card" id="booking-form">
+          <div class="booking-card-heading">
+            <div><span class="step-label">LET’S GET YOU BOOKED</span><h3>Your session</h3></div>
+            <span class="step-count">01 <i>/ 01</i></span>
+          </div>
+          <label for="service">Choose a treatment</label>
+          <select id="service" name="service" required>
+            <option value="Unwind" data-duration="60" data-price="1000">Unwind · 60 min · ₹1,000</option>
+            <option value="Restore" data-duration="75" data-price="1250">Restore · 75 min · ₹1,250</option>
+            <option value="Reconnect" data-duration="90" data-price="1500">Reconnect · 90 min · ₹1,500</option>
+          </select>
+          <label for="booking-location">Choose a location</label>
+          <select id="booking-location" name="location" required>
+            <option value="Medinipur">Medinipur</option>
+            <option value="Kharagpur">Kharagpur</option>
+          </select>
+          <div class="form-row">
+            <div>
+              <label for="booking-date">Choose a date</label>
+              <input id="booking-date" name="date" type="date" required />
+            </div>
+            <div>
+              <label for="booking-time">Choose a time</label>
+              <select id="booking-time" name="time" required>
+                <option value="">Select a time</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="guest-name">Your name</label>
+              <input id="guest-name" name="name" type="text" placeholder="First and last name" autocomplete="name" required />
+            </div>
+            <div>
+              <label for="guest-email">Email address</label>
+              <input id="guest-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required />
+            </div>
+          </div>
+          <label for="guest-mobile">Mobile number</label>
+          <input id="guest-mobile" name="mobile" type="tel" placeholder="Your mobile number" autocomplete="tel" required />
+          <div class="booking-summary">
+            <span id="summary-label">Unwind · 60 minutes</span>
+            <strong id="summary-price">₹1,000</strong>
+          </div>
+          <button class="button booking-submit" type="submit">Send booking request <span aria-hidden="true">↗</span></button>
+          <p class="booking-disclaimer">Your request will be saved for review. Your appointment is confirmed only after approval.</p>
+          <p class="booking-message" id="booking-message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="visit-row" id="visit">
+        <div><span class="visit-icon">⌖</span><div><strong>Medinipur</strong><span>West Bengal, India</span></div></div>
+        <div><span class="visit-icon">⌖</span><div><strong>Kharagpur</strong><span>West Bengal, India</span></div></div>
+        <div><span class="visit-icon">◷</span><div><strong>Come by when it suits</strong><span>Monday – Saturday, 11am – 1am</span></div></div>
+        <a href="mailto:rideravik47@gmail.com">Questions? Say hello <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a class="brand footer-brand" href="#"><span class="brand-mark" aria-hidden="true">s</span><span>serein</span></a>
+      <span>A little more room to breathe.</span>
+      <span>© 2025 Serein Studio</span>
+    </footer>
+  </body>
+</html>
