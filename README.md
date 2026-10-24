@@ -24,17 +24,20 @@ The site needs a Node.js host that can reach MongoDB Atlas when deployed. The
 host must provide `MONGODB_URI` and, optionally, `MONGODB_DB` and `PORT` as
 environment variables. Do not publish the MongoDB connection string.
 
-## Deploy to Render
+## Deploy to Railway
 
-1. Push this repository to GitHub and sign in to [Render](https://render.com/).
-2. In the Render dashboard, choose **New → Blueprint**, select this GitHub
-   repository, and apply the `render.yaml` configuration.
-3. When prompted, enter the complete MongoDB Atlas connection string for
-   `MONGODB_URI`. Keep it private; Render stores it as an environment variable.
-4. In MongoDB Atlas Network Access, allow the outbound IP ranges shown for the
-   Render service. Do not expose the database to all IP addresses.
-5. Wait for the service deploy to finish, then open its `onrender.com` URL.
+1. Sign in to [Railway](https://railway.com/) and create a project using
+   **Deploy from GitHub repo**. Select `avik6941-stack/serein` and the `main`
+   branch. Railway detects the Node.js app and uses `npm start`.
+2. In the service's **Variables** settings, add `MONGODB_URI` with the complete
+   MongoDB Atlas connection string and `MONGODB_DB` with the value `serein`.
+   Enter the URI directly in Railway; never commit it or share it publicly.
+3. Configure MongoDB Atlas Network Access so the deployed service can reach
+   the cluster.
+4. In the service's **Settings → Networking**, generate a public domain and
+   open it after the deployment succeeds.
 
-The free Render service may sleep when idle, so its first request after a period
-of inactivity can take longer. Booking submissions require a reachable MongoDB
-Atlas database.
+Railway's Free plan includes $1 of monthly usage credit; resource use beyond
+included credits may require a paid plan or incur charges. Check
+[Railway pricing](https://railway.com/pricing) before deploying. Booking
+submissions require a reachable MongoDB Atlas database.
