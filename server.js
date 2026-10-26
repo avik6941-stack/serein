@@ -100,7 +100,7 @@ function escapeHtml(value) {
   })[char]);
 }
 
-// Sends an owner notification through Resend's HTTP API (Render's free tier blocks SMTP).
+// Sends owner notifications through Resend's HTTP API instead of relying on SMTP.
 // Never throws: a failed email must not fail the customer's booking.
 async function notifyOwner(booking, bookingId) {
   if (!resendApiKey) return;
