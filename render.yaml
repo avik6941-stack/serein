@@ -11,3 +11,7 @@ services:
         sync: false
       - key: MONGODB_DB
         value: serein
+      - key: RESEND_API_KEY
+        sync: false
+      - key: NOTIFY_EMAIL
+        value: rideravik47@gmail.com

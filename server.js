@@ -11,6 +11,9 @@ const port = Number(process.env.PORT || 3000);
 const mongoUri = process.env.MONGODB_URI;
 const databaseName = process.env.MONGODB_DB || "serein";
 const ownerEmail = "rideravik47@gmail.com";
+const notifyEmail = process.env.NOTIFY_EMAIL || ownerEmail;
+const resendApiKey = process.env.RESEND_API_KEY;
+const mailFrom = process.env.MAIL_FROM || "Serein Bookings <onboarding@resend.dev>";
 const treatments = {
   Unwind: { duration: 60, price: 1000 },
   Restore: { duration: 75, price: 1250 },
@@ -91,6 +94,47 @@ function cleanText(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[char]);
+}
+
+// Sends an owner notification through Resend's HTTP API (Render's free tier blocks SMTP).
+// Never throws: a failed email must not fail the customer's booking.
+async function notifyOwner(booking, bookingId) {
+  if (!resendApiKey) return;
+  const rows = [
+    ["Name", booking.name],
+    ["Email", booking.email],
+    ["Mobile", booking.mobile],
+    ["Location", booking.location],
+    ["Treatment", `${booking.service} (${booking.duration} min, ₹${booking.price})`],
+    ["Date", booking.date],
+    ["Time", booking.time],
+    ["Booking ID", bookingId],
+  ];
+  const html = `<h2>New Serein booking request</h2><table cellpadding="6">${rows
+    .map(([k, v]) => `<tr><td><strong>${k}</strong></td><td>${escapeHtml(v)}</td></tr>`)
+    .join("")}</table><p>Status: pending. Contact the customer to confirm.</p>`;
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: mailFrom,
+        to: [notifyEmail],
+        reply_to: booking.email,
+        subject: `New booking: ${booking.service} on ${booking.date} at ${booking.time}`,
+        html,
+      }),
+    });
+    if (!res.ok) console.error("Booking email failed.", res.status, await res.text());
+  } catch (error) {
+    console.error("Booking email failed.", error);
+  }
+}
+
 app.post(
   "/api/bookings",
   bookingLimiter,
@@ -142,6 +186,7 @@ app.post(
 
     try {
       const result = await request.app.locals.bookings.insertOne(booking);
+      void notifyOwner(booking, result.insertedId.toString());
       return response.status(201).json({
         bookingId: result.insertedId.toString(),
         message: "Booking request saved for studio review.",

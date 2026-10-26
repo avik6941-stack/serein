@@ -59,6 +59,11 @@ document.querySelectorAll(".select-treatment").forEach((button) => {
 bookingForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!bookingForm.reportValidity()) return;
+  if (window.location.protocol === "file:") {
+    bookingMessage.textContent = "Open the site at http://localhost:3000 after starting the Node.js server. Set MONGODB_URI in .env first; opening index.html from disk cannot submit bookings.";
+    bookingMessage.classList.add("is-visible");
+    return;
+  }
 
   const formData = new FormData(bookingForm);
   const selectedService = serviceSelect.selectedOptions[0];
