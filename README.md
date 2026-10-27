@@ -1,8 +1,8 @@
-# Serein booking site
+# Serein appointment request site
 
-Booking requests are stored in MongoDB in the `bookings` collection with
-`status: "pending"`. Review them in MongoDB Atlas under **Database → Browse
-Collections**. No public endpoint exposes customer booking records.
+The public brochure links to a Google Form for appointment requests. Google
+Forms collects responses in the account owner's linked Google Sheet; the site
+does not reserve or confirm appointments.
 
 ## Run locally
 
@@ -16,32 +16,27 @@ Collections**. No public endpoint exposes customer booking records.
 4. Open a terminal in this folder and run `npm install` followed by `npm start`.
 5. Open `http://localhost:3000` (do not open `index.html` directly from disk).
 
-The booking form submits to the server, which validates the request and saves it
-as pending. The site does not automatically approve appointments or email
-customers. After reviewing a request, contact the customer to confirm it.
+## Deploy the public appointment request site
 
-The site needs a Node.js host that can reach MongoDB Atlas when deployed. The
-host must provide `MONGODB_URI` and, optionally, `MONGODB_DB` and `PORT` as
-environment variables. Do not publish the MongoDB connection string.
+The website's appointment request buttons open the Google Form configured in
+`public/index.html`. Responses are collected by Google Forms; this static site
+does not need the Express server or MongoDB.
 
-## Deploy the static brochure to Vercel
+To publish the static site on Cloudflare Pages:
 
-The public Vercel deployment is intentionally static and brochure-only. It does
-not include the Express booking API or collect appointment details. Contact the
-studio by email to ask about availability. Use Vercel Hobby only for personal,
-non-commercial demos; choose a plan and host whose terms permit commercial use
-before using this site to promote a business.
+1. In Cloudflare, go to **Workers & Pages → Create application → Pages →
+   Connect to Git** and select this GitHub repository.
+2. Select the `setup/google-forms-request-link` branch as the production
+   branch. Set the build command to empty and the build output directory to
+   `public`.
+3. Deploy the site and use its `pages.dev` address. A custom domain can be
+   connected later.
+4. Keep the Google response Sheet private and review it regularly. The form
+   currently collects contact information, treatment, location, and a
+   preferred date. The form itself must state how customers' personal
+   information is used and who can access responses.
 
-1. Push the project to GitHub and import the repository in [Vercel](https://vercel.com/).
-2. In the Vercel project settings, set **Root Directory** to `public`. This
-   publishes only the static page and prevents the root `server.js` booking API
-   from being deployed.
-3. Keep the framework preset as **Other** and leave the build command empty.
-   The static assets are `index.html`, `styles.css`, and `script.js`.
-4. Deploy and assign a Vercel domain from the project settings. No MongoDB
-   environment variables are needed for the brochure deployment.
-
-To re-enable online bookings, deploy the Express server separately on a host
-whose plan and terms support the intended use, then configure a valid
-`MONGODB_URI` privately in that host's environment settings. Never put database
-credentials in browser code or commit them to Git.
+The existing Vercel Hobby project is a personal demo; its terms do not allow
+using that plan to promote a business. Do not deploy the business site there.
+The Express/MongoDB endpoint is kept separately for a future server deployment
+if needed.
