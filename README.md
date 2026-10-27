@@ -24,27 +24,24 @@ The site needs a Node.js host that can reach MongoDB Atlas when deployed. The
 host must provide `MONGODB_URI` and, optionally, `MONGODB_DB` and `PORT` as
 environment variables. Do not publish the MongoDB connection string.
 
-## Deploy to Railway
+## Deploy the static brochure to Vercel
 
-1. Sign in to [Railway](https://railway.com/) and create a project using
-   **Deploy from GitHub Repo**. Select this repository and deploy the root
-   directory.
-2. Railway should detect the Node.js app and use `npm start`. If needed, set
-   the service start command to `npm start` in its settings.
-3. Add these service variables in Railway:
-   - `MONGODB_URI`: your MongoDB Atlas connection string. Rotate the database
-     password if it was shared, and add the replacement here as a secret.
-   - `MONGODB_DB`: `serein`
-   - `NOTIFY_EMAIL`: the address that should receive booking notifications
-   - `RESEND_API_KEY`: optional; add a Resend API key to enable email notices
-4. Railway supplies `PORT` automatically. In MongoDB Atlas Network Access,
-   configure access for the Railway service's outbound network. Avoid broad
-   allowlists unless you accept the additional database exposure.
-5. After the first deployment succeeds, generate a public domain in the
-   Railway service's **Settings → Networking** section.
+The public Vercel deployment is intentionally static and brochure-only. It does
+not include the Express booking API or collect appointment details. Contact the
+studio by email to ask about availability. Use Vercel Hobby only for personal,
+non-commercial demos; choose a plan and host whose terms permit commercial use
+before using this site to promote a business.
 
-Railway currently lists its Free plan as including $1/month in usage credits;
-its $5 trial credit is one-time and expires after 30 days. This may not cover
-the service's monthly usage, so check the current [Railway pricing](https://railway.com/pricing)
-before relying on it as a free production host. Booking submissions require a
-reachable MongoDB Atlas database.
+1. Push the project to GitHub and import the repository in [Vercel](https://vercel.com/).
+2. In the Vercel project settings, set **Root Directory** to `public`. This
+   publishes only the static page and prevents the root `server.js` booking API
+   from being deployed.
+3. Keep the framework preset as **Other** and leave the build command empty.
+   The static assets are `index.html`, `styles.css`, and `script.js`.
+4. Deploy and assign a Vercel domain from the project settings. No MongoDB
+   environment variables are needed for the brochure deployment.
+
+To re-enable online bookings, deploy the Express server separately on a host
+whose plan and terms support the intended use, then configure a valid
+`MONGODB_URI` privately in that host's environment settings. Never put database
+credentials in browser code or commit them to Git.
