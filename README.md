@@ -1,6 +1,6 @@
-# Serein booking site
+# Serein appointment request site
 
-Booking requests are stored in MongoDB in the `bookings` collection with
+Appointment requests are stored in MongoDB in the `bookings` collection with
 `status: "pending"`. Review them in MongoDB Atlas under **Database → Browse
 Collections**. No public endpoint exposes customer booking records.
 
@@ -16,32 +16,35 @@ Collections**. No public endpoint exposes customer booking records.
 4. Open a terminal in this folder and run `npm install` followed by `npm start`.
 5. Open `http://localhost:3000` (do not open `index.html` directly from disk).
 
-The booking form submits to the server, which validates the request and saves it
-as pending. The site does not automatically approve appointments or email
-customers. After reviewing a request, contact the customer to confirm it.
+The appointment request form submits to `/api/appointment-requests`. The server
+validates and stores each request as pending; it does not reserve a time or
+confirm an appointment. Email notifications are optional. Review a request and
+contact the customer to confirm it.
 
 The site needs a Node.js host that can reach MongoDB Atlas when deployed. The
 host must provide `MONGODB_URI` and, optionally, `MONGODB_DB` and `PORT` as
 environment variables. Do not publish the MongoDB connection string.
 
-## Deploy the static brochure to Vercel
+## Deploy the appointment request app on Railway
 
-The public Vercel deployment is intentionally static and brochure-only. It does
-not include the Express booking API or collect appointment details. Contact the
-studio by email to ask about availability. Use Vercel Hobby only for personal,
-non-commercial demos; choose a plan and host whose terms permit commercial use
-before using this site to promote a business.
+The app must be deployed from the repository root so Railway runs the Express
+server and serves the files in `public/`. Do not set `public/` as the root:
+that would omit the request endpoint.
 
-1. Push the project to GitHub and import the repository in [Vercel](https://vercel.com/).
-2. In the Vercel project settings, set **Root Directory** to `public`. This
-   publishes only the static page and prevents the root `server.js` booking API
-   from being deployed.
-3. Keep the framework preset as **Other** and leave the build command empty.
-   The static assets are `index.html`, `styles.css`, and `script.js`.
-4. Deploy and assign a Vercel domain from the project settings. No MongoDB
-   environment variables are needed for the brochure deployment.
+1. Create a Railway project and deploy this GitHub repository as a service.
+   Select the repository root. Railway can start the app with `npm start`.
+2. In the service's **Variables** settings, add `MONGODB_URI` as a secret and
+   set `MONGODB_DB` to `serein`. Optionally add `NOTIFY_EMAIL` and
+   `RESEND_API_KEY` for owner email notifications. Never commit or share the
+   database URI.
+3. Configure MongoDB Atlas Network Access to allow the app host's outbound
+   connection. Use a valid database user and connection string; do not allow
+   all IP addresses unless you explicitly accept that exposure.
+4. Generate a Railway public domain and verify an appointment request is saved
+   with `status: "pending"` before sharing the site. Add a custom domain later
+   in Railway when one has been purchased.
 
-To re-enable online bookings, deploy the Express server separately on a host
-whose plan and terms support the intended use, then configure a valid
-`MONGODB_URI` privately in that host's environment settings. Never put database
-credentials in browser code or commit them to Git.
+The existing Vercel project is configured as a static brochure and does not
+run the request server. Vercel Hobby is restricted to personal, non-commercial
+use; use a host and plan that permit the intended business use before
+publishing customer appointment requests.

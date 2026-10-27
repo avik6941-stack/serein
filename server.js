@@ -1,4 +1,4 @@
-const path = require("node:path");
+﻿const path = require("node:path");
 require("dotenv").config();
 
 const express = require("express");
@@ -10,28 +10,28 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 const mongoUri = process.env.MONGODB_URI;
 const databaseName = process.env.MONGODB_DB || "serein";
+let mongoClient;
+let appointmentRequestsCollectionPromise;
 const ownerEmail = "rideravik47@gmail.com";
 const notifyEmail = process.env.NOTIFY_EMAIL || ownerEmail;
 const resendApiKey = process.env.RESEND_API_KEY;
-const mailFrom = process.env.MAIL_FROM || "Serein Bookings <onboarding@resend.dev>";
+const mailFrom = process.env.MAIL_FROM || "Serein Appointment Requests <onboarding@resend.dev>";
+
 const treatments = {
   Unwind: { duration: 60, price: 1000 },
   Restore: { duration: 75, price: 1250 },
   Reconnect: { duration: 90, price: 1500 },
 };
+
 const locations = new Set(["Medinipur", "Kharagpur"]);
-const bookingLimiter = rateLimit({
+
+const appointmentRequestLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
   standardHeaders: "draft-8",
   legacyHeaders: false,
-  message: { error: "Too many booking requests. Please try again later." },
+  message: { error: "Too many appointment requests. Please try again later." },
 });
-
-if (!mongoUri) {
-  console.error("MONGODB_URI is required. Set it in your environment before starting the server.");
-  process.exit(1);
-}
 
 app.use(helmet({
   contentSecurityPolicy: {
@@ -46,17 +46,34 @@ app.use(helmet({
   },
 }));
 
-app.get("/", (_request, response) => {
-  response.sendFile(path.join(__dirname, "index.html"));
-});
+app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/styles.css", (_request, response) => {
-  response.sendFile(path.join(__dirname, "styles.css"));
-});
+function getAppointmentRequestsCollection() {
+  if (!mongoUri) {
+    return Promise.reject(new Error("MONGODB_URI is required."));
+  }
 
-app.get("/script.js", (_request, response) => {
-  response.sendFile(path.join(__dirname, "script.js"));
-});
+  if (!appointmentRequestsCollectionPromise) {
+    const client = new MongoClient(mongoUri);
+    mongoClient = client;
+    appointmentRequestsCollectionPromise = client.connect()
+      .then(async () => {
+        const collection = client.db(databaseName).collection("bookings");
+        await collection.createIndex({ createdAt: -1 });
+        return collection;
+      })
+      .catch(async (error) => {
+        await client.close().catch(() => {});
+        if (mongoClient === client) {
+          mongoClient = undefined;
+          appointmentRequestsCollectionPromise = undefined;
+        }
+        throw error;
+      });
+  }
+
+  return appointmentRequestsCollectionPromise;
+}
 
 function getAppointmentTimes(duration) {
   return Array.from({ length: 15 }, (_, index) => {
@@ -96,48 +113,59 @@ function cleanText(value) {
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
   })[char]);
 }
 
-// Sends owner notifications through Resend's HTTP API instead of relying on SMTP.
-// Never throws: a failed email must not fail the customer's booking.
-async function notifyOwner(booking, bookingId) {
+async function notifyOwner(appointmentRequest, requestId) {
   if (!resendApiKey) return;
+
   const rows = [
-    ["Name", booking.name],
-    ["Email", booking.email],
-    ["Mobile", booking.mobile],
-    ["Location", booking.location],
-    ["Treatment", `${booking.service} (${booking.duration} min, ₹${booking.price})`],
-    ["Date", booking.date],
-    ["Time", booking.time],
-    ["Booking ID", bookingId],
+    ["Name", appointmentRequest.name],
+    ["Email", appointmentRequest.email],
+    ["Mobile", appointmentRequest.mobile],
+    ["Location", appointmentRequest.location],
+    ["Treatment", `${appointmentRequest.service} (${appointmentRequest.duration} min, ₹${appointmentRequest.price})`],
+    ["Preferred date", appointmentRequest.date],
+    ["Preferred time", appointmentRequest.time],
+    ["Request ID", requestId],
   ];
-  const html = `<h2>New Serein booking request</h2><table cellpadding="6">${rows
+
+  const html = `<h2>New Serein appointment request</h2><table cellpadding="6">${rows
     .map(([k, v]) => `<tr><td><strong>${k}</strong></td><td>${escapeHtml(v)}</td></tr>`)
     .join("")}</table><p>Status: pending. Contact the customer to confirm.</p>`;
+
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
+      headers: {
+        Authorization: "Bearer " + resendApiKey,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         from: mailFrom,
         to: [notifyEmail],
-        reply_to: booking.email,
-        subject: `New booking: ${booking.service} on ${booking.date} at ${booking.time}`,
+        reply_to: appointmentRequest.email,
+        subject: `Appointment request: ${appointmentRequest.service} on ${appointmentRequest.date} at ${appointmentRequest.time}`,
         html,
       }),
     });
-    if (!res.ok) console.error("Booking email failed.", res.status, await res.text());
+
+    if (!res.ok) {
+      console.error("Appointment request email notification failed.", res.status, await res.text());
+    }
   } catch (error) {
-    console.error("Booking email failed.", error);
+    console.error("Appointment request email notification failed.", error);
   }
 }
 
 app.post(
-  "/api/bookings",
-  bookingLimiter,
+  "/api/appointment-requests",
+  appointmentRequestLimiter,
   express.json({ limit: "10kb" }),
   async (request, response) => {
     const name = cleanText(request.body?.name);
@@ -161,6 +189,7 @@ app.post(
     if (!isValidDate(date) || date < kolkataDateString(new Date())) {
       return response.status(400).json({ error: "Choose a valid future date." });
     }
+
     const requestedDate = new Date(`${date}T00:00:00.000Z`);
     if (requestedDate.getUTCDay() === 0) {
       return response.status(400).json({ error: "The studio is closed on Sundays. Choose another date." });
@@ -169,7 +198,7 @@ app.post(
       return response.status(400).json({ error: "Choose an available appointment time." });
     }
 
-    const booking = {
+    const appointmentRequest = {
       name,
       email,
       mobile,
@@ -185,14 +214,17 @@ app.post(
     };
 
     try {
-      const result = await request.app.locals.bookings.insertOne(booking);
-      void notifyOwner(booking, result.insertedId.toString());
+      const requests = await getAppointmentRequestsCollection();
+      const result = await requests.insertOne(appointmentRequest);
+      const requestId = result.insertedId.toString();
+      await notifyOwner(appointmentRequest, requestId);
+
       return response.status(201).json({
-        bookingId: result.insertedId.toString(),
-        message: "Booking request saved for studio review.",
+        requestId,
+        message: "Appointment request received for studio review.",
       });
     } catch (error) {
-      console.error("Failed to save booking request to MongoDB.", error);
+      console.error("Failed to save appointment request to MongoDB.", error);
       return response.status(500).json({
         error: `We couldn’t save your request. Please try again or email ${ownerEmail}.`,
       });
@@ -202,34 +234,41 @@ app.post(
 
 app.use((error, _request, response, _next) => {
   if (error instanceof SyntaxError && "body" in error) {
-    return response.status(400).json({ error: "The booking request could not be read. Please check the form and try again." });
+    return response.status(400).json({
+      error: "The appointment request could not be read. Please check the form and try again.",
+    });
   }
+
   console.error("Request failed.", error);
   return response.status(500).json({ error: "Something went wrong. Please try again later." });
 });
 
 async function startServer() {
-  const client = new MongoClient(mongoUri);
-  await client.connect();
-  const database = client.db(databaseName);
-  await database.collection("bookings").createIndex({ createdAt: -1 });
-  app.locals.bookings = database.collection("bookings");
+  if (mongoUri) {
+    await getAppointmentRequestsCollection();
+  } else {
+    console.warn("MONGODB_URI is not set; appointment requests cannot be saved. Set MONGODB_URI in .env.");
+  }
 
   const server = app.listen(port, () => {
-    console.log(`Serein booking site listening on port ${port}.`);
+    console.log(`Serein appointment request site listening on port ${port}.`);
   });
 
   for (const signal of ["SIGINT", "SIGTERM"]) {
     process.once(signal, () => {
       server.close(async () => {
-        await client.close();
+        await mongoClient?.close();
         process.exit(0);
       });
     });
   }
 }
 
-startServer().catch((error) => {
-  console.error("Unable to start the booking server or connect to MongoDB.", error);
-  process.exit(1);
-});
+module.exports = app;
+
+if (require.main === module) {
+  startServer().catch((error) => {
+    console.error("Unable to start the appointment request server or connect to MongoDB.", error);
+    process.exit(1);
+  });
+}
